@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { WithCaptchaDto } from '../captcha/captcha.dto';
 import type { TelPartnerCodeUpdate } from './integrate-inventory.service';
 
 const TEL_PARTNERS = [
@@ -11,7 +12,7 @@ const TEL_PARTNERS = [
   'REDDI',
 ] as const;
 
-export class InventoryExcelZipDto {
+export class InventoryExcelZipDto extends WithCaptchaDto {
   @ApiProperty({ example: '01/01/2026 00:00:00' })
   fromDate!: string;
 
@@ -19,7 +20,7 @@ export class InventoryExcelZipDto {
   toDate!: string;
 }
 
-export class InventoryTelcoUpdateDto {
+export class InventoryTelcoUpdateDto extends WithCaptchaDto {
   @ApiProperty({ example: '0900000000' })
   phoneNumber!: string;
 

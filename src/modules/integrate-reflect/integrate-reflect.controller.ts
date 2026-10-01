@@ -1,7 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CaptchaService } from '../captcha/captcha.service';
 import {
-  ReflectItemDto,
+  ReflectAddOneDto,
   ReflectManyDto,
   ReflectResultDto,
 } from './integrate-reflect.dto';
@@ -13,12 +14,14 @@ import { DncEnvelope } from 'src/integrations/dnc';
 export class IntegrateReflectController {
   constructor(
     private readonly integrateReflectService: IntegrateReflectService,
+    private readonly captchaService: CaptchaService,
   ) {}
 
   @Post('reflect-add-one')
   @ApiOperation({ summary: 'Truyền phản ánh đơn' })
   @ApiOkResponse({ type: ReflectResultDto })
-  addOneController(@Body() body: ReflectItemDto): Promise<DncEnvelope> {
+  async addOneController(@Body() body: ReflectAddOneDto): Promise<DncEnvelope> {
+    await this.captchaService.verify(body.captchaToken);
     return this.integrateReflectService.addOne({
       cusPhone: body.cusPhone,
       reflectFormCode: body.reflectFormCode,
@@ -30,7 +33,8 @@ export class IntegrateReflectController {
   @Post('reflect-add-many')
   @ApiOperation({ summary: 'Truyền phản ánh theo danh sách' })
   @ApiOkResponse({ type: ReflectResultDto })
-  addManyController(@Body() body: ReflectManyDto): Promise<DncEnvelope> {
+  async addManyController(@Body() body: ReflectManyDto): Promise<DncEnvelope> {
+    await this.captchaService.verify(body.captchaToken);
     return this.integrateReflectService.addMany(body.importData);
   }
 }

@@ -6,6 +6,7 @@ import { IntegrateReflectModule } from './modules/integrate-reflect/integrate-re
 import { IntegrateInventoryModule } from './modules/integrate-inventory/integrate-inventory.module';
 import { IntegrateReconciliationModule } from './modules/integrate-reconciliation/integrate-reconciliation.module';
 import { IntegrateComplainModule } from './modules/integrate-complain/integrate-complain.module';
+import { CaptchaModule } from './modules/captcha/captcha.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { IntegrateComplainModule } from './modules/integrate-complain/integrate-
     IntegrateInventoryModule,
     IntegrateReconciliationModule,
     IntegrateComplainModule,
+    CaptchaModule,
   ],
 })
 export class AppModule {}

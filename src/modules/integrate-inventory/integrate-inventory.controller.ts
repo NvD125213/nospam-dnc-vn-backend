@@ -2,6 +2,7 @@ import { Body, Controller, Post, Res, StreamableFile } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { isDncFile } from '../../integrations/dnc';
+import { CaptchaService } from '../captcha/captcha.service';
 import {
   InventoryExcelZipDto,
   InventoryTelcoUpdateDto,
@@ -14,6 +15,7 @@ import { IntegrateInventoryService } from './integrate-inventory.service';
 export class IntegrateInventoryController {
   constructor(
     private readonly integrateInventoryService: IntegrateInventoryService,
+    private readonly captchaService: CaptchaService,
   ) {}
 
   // Controller tải file Excel kho dữ liệu
@@ -24,6 +26,7 @@ export class IntegrateInventoryController {
     @Body() body: InventoryExcelZipDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
+    await this.captchaService.verify(body.captchaToken);
     const { fromDate, toDate } = body;
     const result = await this.integrateInventoryService.excelZip({
       fromDate,
@@ -44,9 +47,10 @@ export class IntegrateInventoryController {
   @Post('inventory/update-telco')
   @ApiOperation({ summary: 'Cập nhật thuê bao giữ số đổi mạng' })
   @ApiOkResponse({ type: InventoryResultDto })
-  updateTelcoController(
+  async updateTelcoController(
     @Body() body: InventoryTelcoUpdateDto,
   ): Promise<InventoryResultDto> {
+    await this.captchaService.verify(body.captchaToken);
     return this.integrateInventoryService.updateTelco({
       phoneNumber: body.phoneNumber,
       telPartnerCodeUpdate: body.telPartnerCodeUpdate,

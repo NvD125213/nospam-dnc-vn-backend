@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { WithCaptchaDto } from '../captcha/captcha.dto';
 
-export class ComplainExcelZipDto {
+export class ComplainExcelZipDto extends WithCaptchaDto {
   @ApiProperty({ example: '01/01/2026 00:00:00' })
   fromDate!: string;
 
@@ -8,12 +9,12 @@ export class ComplainExcelZipDto {
   toDate!: string;
 }
 
-export class ComplainAddDto {
+export class ComplainAddDto extends WithCaptchaDto {
   @ApiProperty()
   smsContent!: string;
 
   @ApiProperty({ example: '0900000000' })
-  prefPhoneNumber!: string;
+  prefixNumber!: string;
 
   @ApiProperty()
   complainType!: string;

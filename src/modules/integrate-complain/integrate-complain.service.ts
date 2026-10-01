@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DncClient } from '../../integrations/dnc';
 import type { DncEnvelope } from '../../integrations/dnc';
 
@@ -28,7 +28,7 @@ export type ComplainListTypeResult = DncEnvelope & {
 
 export type ComplainAdd = {
   smsContent: string;
-  prefPhoneNumber: string;
+  prefixNumber: string;
   complainType: string;
   ownerPhone: string;
   evidenceFile?: string;
@@ -71,22 +71,45 @@ export class IntegrateComplainService {
   }
 
   // Danh mục loại phản ánh. Không yêu cầu chữ ký.
-  listType(): Promise<ComplainListTypeResult> {
-    return this.dnc.request<ComplainListTypeResult>({
+  listType(): Promise<ComplainListTypeResult | ComplainTypeItem[]> {
+    return this.dnc.request<ComplainListTypeResult | ComplainTypeItem[]>({
       method: 'GET',
       path: 'integrate/complain/get-list-type',
     });
   }
 
+  private normalizeComplainTypes(
+    payload: ComplainListTypeResult | ComplainTypeItem[] | null | undefined,
+  ): ComplainTypeItem[] {
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload.content)) return payload.content;
+    return [];
+  }
+
   // Thêm mới phản ánh. Chữ ký lấy từ SIGNATURE.
-  add(input: ComplainAdd): Promise<DncEnvelope> {
+  async add(input: ComplainAdd): Promise<DncEnvelope> {
+    const complainType = input.complainType?.trim();
+    if (!complainType) {
+      throw new BadRequestException('Thiếu loại phản ánh');
+    }
+
+    const types = this.normalizeComplainTypes(await this.listType());
+    const matched = types.some(
+      (item) => String(item?.id ?? '').trim() === complainType,
+    );
+    if (!matched) {
+      throw new BadRequestException(
+        'Loại phản ánh không hợp lệ hoặc không nằm trong danh mục',
+      );
+    }
+
     return this.dnc.request({
       method: 'POST',
       path: 'integrate/complain/add',
       body: {
         smsContent: input.smsContent,
-        prefPhoneNumber: input.prefPhoneNumber,
-        complainType: input.complainType,
+        prefixNumber: input.prefixNumber,
+        complainType,
         ownerPhone: input.ownerPhone,
         evidenceFile: input.evidenceFile,
         signature: this.dnc.signature,

@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { WithCaptchaDto } from '../captcha/captcha.dto';
 import type {
   ReflectRequestType,
   ReflectTypeCode,
@@ -21,7 +22,24 @@ export class ReflectItemDto {
   requestType!: ReflectRequestType;
 }
 
-export class ReflectManyDto {
+export class ReflectAddOneDto extends WithCaptchaDto {
+  @ApiProperty({ example: '0900000000' })
+  cusPhone!: string;
+
+  @ApiPropertyOptional({
+    example: 'SMS',
+    description: 'Nguồn phản ánh. Bỏ trống thì mặc định SMS.',
+  })
+  reflectFormCode?: string;
+
+  @ApiProperty({ enum: ['SMS', 'CALL', 'BOTH'], example: 'SMS' })
+  reflectTypeCode!: ReflectTypeCode;
+
+  @ApiProperty({ enum: ['REGISTER', 'UNREGISTER'], example: 'REGISTER' })
+  requestType!: ReflectRequestType;
+}
+
+export class ReflectManyDto extends WithCaptchaDto {
   @ApiProperty({ type: [ReflectItemDto] })
   importData!: ReflectItemDto[];
 }

@@ -1,15 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DncClient } from '../../integrations/dnc';
 import type { DncEnvelope } from '../../integrations/dnc';
 
 export type TelPartnerCodeUpdate =
-  | 'VIETTEL'
-  | 'MOBIFONE'
-  | 'VINAPHONE'
-  | 'VIETNAM MOBILE'
-  | 'GTEL'
-  | 'ITEL'
-  | 'REDDI';
+  'VIETTEL' | 'MOBIFONE' | 'ITEL' | 'GMOBILE' | 'VINAPHONE' | 'VIETNAMMOBILE';
 
 export type InventoryExcelZip = {
   fromDate: string;
@@ -39,6 +33,19 @@ export class IntegrateInventoryService {
 
   // Cập nhật thuê bao giữ số đổi mạng. Chữ ký lấy từ SIGNATURE.
   updateTelco(input: InventoryTelcoUpdate): Promise<DncEnvelope> {
+    const allowedTelPartnerCodes = [
+      'VIETTEL',
+      'MOBIFONE',
+      'ITEL',
+      'GMOBILE',
+      'VINAPHONE',
+      'VIETNAMMOBILE',
+    ];
+
+    if (!allowedTelPartnerCodes.includes(input.telPartnerCodeUpdate)) {
+      throw new BadRequestException('Mã nhà mạng không hợp lệ');
+    }
+
     return this.dnc.request({
       method: 'POST',
       path: 'integrate/inventory/update-telco',

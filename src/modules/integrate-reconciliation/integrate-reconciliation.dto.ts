@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { WithCaptchaDto } from '../captcha/captcha.dto';
 
-export class ReconciliationCreateDto {
+export class ReconciliationCreateDto extends WithCaptchaDto {
   @ApiProperty()
   fileUrl!: string;
 
@@ -8,7 +9,7 @@ export class ReconciliationCreateDto {
   callbackUrl!: string;
 }
 
-export class ReconciliationCheckDto {
+export class ReconciliationCheckDto extends WithCaptchaDto {
   @ApiProperty()
   requestId!: string;
 }
